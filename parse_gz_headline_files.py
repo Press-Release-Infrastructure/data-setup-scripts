@@ -1,9 +1,10 @@
 import gzip
 import regex as re
 import os
+import sys
 from datetime import datetime
 
-file_path = '9ec7c097-473e-41f3-b890-cdcd45d1d0ac.gz'
+file_path = sys.argv[1] #'9ec7c097-473e-41f3-b890-cdcd45d1d0ac.gz'
 headline1 = []
 headline2 = []
 article_id = []
