@@ -3,18 +3,12 @@ import regex as re
 import os
 import sys
 from datetime import datetime
+import sqlite3
 
-file_path = sys.argv[1] #'9ec7c097-473e-41f3-b890-cdcd45d1d0ac.gz'
-headline1 = []
-headline2 = []
-article_id = []
-source_filename = []
-pub_date = []
-news_wire = []
-language = []
-indexing_terms = []
-company_terms = []
-ticker_terms = []
+file_path = sys.argv[1]
+
+conn = sqlite3.connect('/home/ec2-user/data-setup-scripts/press_release_headlines.db', detect_types = sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
+c = conn.cursor()
 
 filename = os.path.basename(file_path)
 with gzip.open(file_path, 'rt') as headline_dump:
@@ -22,12 +16,12 @@ with gzip.open(file_path, 'rt') as headline_dump:
     headline_chunks = re.findall('<articleDoc xmlns:xsi[\S|\s]*?<\/articleDoc>', headline_text)
     for chunk in headline_chunks:
         try:
-            h1 = re.search('<nitf:hedline>\s*<nitf:hl1>\s*(.*)\s*<\/nitf:hl1>', chunk).group(1)
+            h1 = re.search('<nitf:hedline>\s*<nitf:hl1>\s*(.*)\s*<\/nitf:hl1>', chunk).group(1).replace("\"", "")
         except:
             h1 = ''
 
         try:
-            h2 = re.search('<nitf:hl2>\s*(.*)\s*<\/nitf:hl2>', chunk).group(1)
+            h2 = re.search('<nitf:hl2>\s*(.*)\s*<\/nitf:hl2>', chunk).group(1).replace("\"", "")
         except:
             h2 = ''
 
@@ -37,9 +31,9 @@ with gzip.open(file_path, 'rt') as headline_dump:
             aid = ''
 
         try:
-            pd = datetime.strptime(' '.join(re.search('<dateText>(.*)<\/dateText>', chunk).group(1).split(' ')[:-1]), '%B %d, %Y')
+            curr_pub_date = datetime.strptime(' '.join(re.search('<dateText>(.*)<\/dateText>', chunk).group(1).split(' ')[:-1]), '%B %d, %Y')
         except:
-            pd = ''
+            curr_pub_date = ''
 
         try:
             nw = re.search('<publicationName>(.*)</publicationName>', chunk).group(1) 
@@ -68,25 +62,15 @@ with gzip.open(file_path, 'rt') as headline_dump:
             curr_ticker_terms = re.findall('<classificationItem score="([0-9]*)">[\s|\S]*?<className>(.*?)<\/className>[\s|\S]*?<\/classificationItem>', ticker_chunk)
         except:
             curr_ticker_terms = []
-        
-        headline1.append(h1)
-        headline2.append(h2)
-        article_id.append(aid)
-        source_filename.append(filename)
-        pub_date.append(pd)
-        news_wire.append(nw)
-        language.append(lang)
-        indexing_terms.append(curr_indexing_terms)
-        company_terms.append(curr_company_terms)
-        ticker_terms.append(curr_ticker_terms)
 
-print(headline1)
-print(headline2)
-print(article_id)
-print(source_filename)
-print(pub_date)
-print(news_wire)
-print(language)
-print(indexing_terms)
-print(company_terms)
-print(ticker_terms)
+        curr_it = ['{}:{}'.format(i[0], i[1]).replace("\"", "").replace("'", "") for i in curr_indexing_terms]
+        curr_ct = ['{}:{}'.format(i[0], i[1]).replace("\"", "").replace("'", "") for i in curr_company_terms]
+        curr_tt = ['{}:{}'.format(i[0], i[1]).replace("\"", "").replace("'", "") for i in curr_ticker_terms]
+        
+        c.execute('''
+            INSERT INTO headline_data(headline_1, headline_2, article_id, publication_date, language, indexing_terms, company_terms, ticker_terms, source_file)
+            VALUES
+                ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")
+        '''.format(h1, h2, aid, curr_pub_date, lang, curr_it, curr_ct, curr_tt, filename))
+
+conn.commit()
