@@ -68,9 +68,9 @@ with gzip.open(file_path, 'rt') as headline_dump:
         curr_tt = ['{}:{}'.format(i[0], i[1]).replace("\"", "").replace("'", "") for i in curr_ticker_terms]
         
         c.execute('''
-            INSERT INTO headline_data(headline_1, headline_2, article_id, publication_date, language, indexing_terms, company_terms, ticker_terms, source_file)
+            INSERT INTO headline_data(headline_1, headline_2, article_id, newswire, publication_date, language, indexing_terms, company_terms, ticker_terms, source_file)
             VALUES
-                ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")
-        '''.format(h1, h2, aid, curr_pub_date, lang, curr_it, curr_ct, curr_tt, filename))
+                ("{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}", "{}")
+        '''.format(h1, h2, aid, nw, curr_pub_date, lang, curr_it, curr_ct, curr_tt, filename))
 
 conn.commit()

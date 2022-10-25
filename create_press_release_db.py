@@ -10,6 +10,7 @@ c.execute('''
             [headline_1] TEXT,
             [headline_2] TEXT,
             [article_id] TEXT,
+            [newswire] TEXT,
             [publication_date] TEXT,
             [language] TEXT,
             [indexing_terms] TEXT,

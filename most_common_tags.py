@@ -19,4 +19,4 @@ for r in rows:
 # print the 500 most common tags + their counts
 most_common = sorted(tag_dict.items(), key = lambda item: item[1], reverse = True)[:500]
 common_tags_df = pd.DataFrame({"tag_name": [i[0] for i in most_common], "frequency": [i[1] for i in most_common]})
-common_tags_df.to_csv('most_common_tags.csv')
+common_tags_df.to_csv('most_common_tags_10000.csv')
