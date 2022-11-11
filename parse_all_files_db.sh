@@ -3,7 +3,7 @@
 data_dir="/home/ec2-user/press-release-data"
 script_dir="/home/ec2-user/data-setup-scripts"
 i=0
-lim=10
+lim=100
 
 python3 "${script_dir}/create_press_release_db.py"
 
