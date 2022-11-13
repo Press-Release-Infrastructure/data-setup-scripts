@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('/home/ec2-user/data-setup-scripts/press_release_headlines.db')
+conn = sqlite3.connect('/home/ec2-user/data_setup_scripts/press_release_headlines.db')
 c = conn.cursor()
 
 c.execute('''
