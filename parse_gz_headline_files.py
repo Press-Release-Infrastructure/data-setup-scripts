@@ -9,19 +9,19 @@ import time
 filename = sys.argv[1]
 file_num = int(sys.argv[2])
 
-try:
-    with open('./python_time_so_far.txt', 'r') as python_time_so_far:
-        python_time = float(python_time_so_far.readlines()[0])
-except:
-    python_time = 0.0
+# try:
+#     with open('./python_time_so_far.txt', 'r') as python_time_so_far:
+#         python_time = float(python_time_so_far.readlines()[0])
+# except:
+#     python_time = 0.0
 
-try:
-    with open('./sql_time_so_far.txt', 'r') as sql_time_so_far:
-        sql_time = float(sql_time_so_far.readlines()[0])
-except:
-    sql_time = 0.0
+# try:
+#     with open('./sql_time_so_far.txt', 'r') as sql_time_so_far:
+#         sql_time = float(sql_time_so_far.readlines()[0])
+# except:
+#     sql_time = 0.0
 
-time_incr = 1000
+# time_incr = 1000
 
 def chunk_slice(chunk, tag_start, tag_end):
     start_ind = chunk.find(tag_start)
@@ -34,25 +34,6 @@ def chunk_slice(chunk, tag_start, tag_end):
 conn = sqlite3.connect('/home/ec2-user/data_setup_scripts/press_release_headlines.db', sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 c = conn.cursor()
 
-c.execute('''
-        CREATE TABLE IF NOT EXISTS headline_data
-        (
-            [headline_id] INTEGER PRIMARY KEY,
-            [headline_1] TEXT,
-            [headline_2] TEXT,
-            [article_id] TEXT,
-            [newswire] TEXT,
-            [publication_date] TEXT,
-            [language] TEXT,
-            [indexing_terms] TEXT,
-            [company_terms] TEXT,
-            [ticker_terms] TEXT,
-            [source_file] TEXT
-        )
-        ''')
-
-conn.commit()
-
 # precompile regex
 aid_regex = re.compile('<dc:identifier identifierScheme="PGUID">urn:contentItem:(.*)<\/dc:identifier>')
 lang_regex = re.compile('<classification classificationScheme="language">[\s|\S]*?<className>([a-zA-Z]*)<\/className>[\s|\S]*?<\/classification>')
@@ -63,12 +44,9 @@ company_term_regex = re.compile('<classificationItem score="([0-9]*)">[\s|\S]*?<
 ticker_chunk_regex = re.compile('<classification classificationScheme="ticker">([\s|\S]*?)</classification>')
 ticker_term_regex = re.compile('<classificationItem score="([0-9]*)">[\s|\S]*?<className>(.*?)<\/className>[\s|\S]*?<\/classificationItem>')
 
-# with open('/home/ec2-user/data_setup_scripts/ls_output.txt', 'r') as ls_output:
-#     gz_files = ls_output.read().splitlines() 
+python_time = 0
+sql_time = 0
 
-# with open('/home/ec2-user/data_setup_scripts/db_progress.txt', 'a') as db_progress:
-    # for file_path in gz_files:
-    # filename = '/home/ec2-user/press_release_data/' + os.path.basename(file_path).strip()
 with gzip.open(filename, 'rt') as headline_dump:
     headline_text = headline_dump.read()
     headline_chunks = re.findall('<articleDoc xmlns:xsi[\S|\s]*?<\/articleDoc>', headline_text)
@@ -139,20 +117,23 @@ with gzip.open(filename, 'rt') as headline_dump:
         sql_time += time.time() - sql_start
 
 conn.commit()
-print('Num: {} Python Time: {} SQL Time: {}'.format(file_num, python_time, sql_time))
 
-with open('./python_time_so_far.txt', 'w') as python_time_so_far:
-    python_time_so_far.write(str(python_time))
+# with open('./python_time_so_far.txt', 'w') as python_time_so_far:
+#     python_time_so_far.write(str(python_time))
 
-with open('./sql_time_so_far.txt', 'w') as sql_time_so_far:
-    sql_time_so_far.write(str(sql_time))
+# with open('./sql_time_so_far.txt', 'w') as sql_time_so_far:
+#     sql_time_so_far.write(str(sql_time))
 
-if file_num % time_incr == 0:
-    with open('./python_time_overall.txt', 'a') as python_time_overall:
-        python_time_overall.write('{} {}'.format(file_num, python_time))
+if file_num % 100 == 0:
+    file_size = os.path.getsize(filename)
+    print('Num: {} Python Time: {} SQL Time: {} File size: {}'.format(file_num, python_time, sql_time, file_size))
 
-    with open('./sql_time_overall.txt', 'a') as sql_time_overall:
-        sql_time_overall.write('{} {}'.format(file_num, sql_time))
+# if file_num % time_incr == 0:
+#     with open('./python_time_overall.txt', 'a') as python_time_overall:
+#         python_time_overall.write('{} {}'.format(file_num, python_time))
+
+#     with open('./sql_time_overall.txt', 'a') as sql_time_overall:
+#         sql_time_overall.write('{} {}'.format(file_num, sql_time))
     
-    python_time = 0
-    sql_time = 0
+#     python_time = 0
+#     sql_time = 0
