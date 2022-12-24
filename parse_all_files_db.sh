@@ -21,15 +21,16 @@ i=0
 
 cat "${script_dir}/files_todo.csv" | while read file; 
 do
-	# if (( i < 21900 )); then 
+	#if (( i < 40585 )); then 
 	# 	i=$((i+1))
 	# 	continue;
-	# fi
+	#fi
 
-	echo $i
-	timeout 10 python3 "${script_dir}/__pycache__/parse_gz_headline_files.cpython-37.pyc" "${data_dir}/${file}" "${i}"
+	echo $i $file
+	python3 "${script_dir}/__pycache__/parse_gz_headline_files.cpython-37.pyc" "${data_dir}/${file}" "${i}"
 	# if [ "$i" -eq "$lim" ]; then
 	# 	break;
 	# fi
 	i=$((i+1))
+	break
 done;
