@@ -4,6 +4,7 @@ data_dir="/home/ec2-user/press_release_data"
 script_dir="/home/ec2-user/data_setup_scripts"
 
 rm press_release_headlines.db 
+rm unprocessed_files.csv
 
 python3 "${script_dir}/create_press_release_db.py"
 
